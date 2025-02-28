@@ -1,0 +1,40 @@
+import subprocess
+import base64
+
+# Tableau Server 信息
+TABLEAU_SERVER = "https://your-tableau-server.com"
+USERNAME = "your_username"
+PASSWORD = "your_password"
+VIEW_URL = "views/your_dashboard"  # 你的仪表板视图路径
+OUTPUT_FILE = "dashboard.png"
+
+# 使用 tabcmd 登录 Tableau Server
+login_command = [
+    "tabcmd", "login",
+    "--server", TABLEAU_SERVER,
+    "--username", USERNAME,
+    "--password", PASSWORD
+]
+
+# 运行登录命令
+subprocess.run(login_command, check=True)
+
+# 使用 tabcmd 获取仪表板的图片
+get_image_command = [
+    "tabcmd", "get",
+    f"{TABLEAU_SERVER}/{VIEW_URL}.png",
+    "-o", OUTPUT_FILE
+]
+
+# 运行下载命令
+subprocess.run(get_image_command, check=True)
+
+# 读取图片并转换为 Base64 编码字符串
+with open(OUTPUT_FILE, "rb") as img_file:
+    image_base64 = base64.b64encode(img_file.read()).decode('utf-8')
+
+print(f"仪表板图片的 Base64 编码字符串为：{image_base64}")
+
+# 使用 tabcmd 退出登录
+logout_command = ["tabcmd", "logout"]
+subprocess.run(logout_command, check=True)
