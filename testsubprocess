@@ -1,0 +1,6 @@
+import subprocess
+
+try:
+    subprocess.run(["my_command"], check=True)
+except subprocess.CalledProcessError as e:
+    print(f"命令执行失败，错误码：{e.returncode}")
