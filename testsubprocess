@@ -8,3 +8,17 @@ except subprocess.CalledProcessError as e:
 
 import os
 print(os.environ["PATH"])
+
+
+import subprocess
+
+# 替换为实际的 tabcmd.exe 路径
+tabcmd_path = r"C:\path\to\tabcmd.exe"
+
+try:
+    result = subprocess.run([tabcmd_path, "--help"], capture_output=True, text=True, check=True)
+    print(result.stdout)
+except subprocess.CalledProcessError as e:
+    print(f"命令执行失败，错误信息：{e.stderr}")
+except FileNotFoundError:
+    print("未找到指定的 tabcmd.exe 文件，请检查路径是否正确。")
