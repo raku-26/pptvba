@@ -22,3 +22,20 @@ except subprocess.CalledProcessError as e:
     print(f"命令执行失败，错误信息：{e.stderr}")
 except FileNotFoundError:
     print("未找到指定的 tabcmd.exe 文件，请检查路径是否正确。")
+
+
+import base64
+import pandas as pd
+from ayx import Alteryx
+
+with open("Z:/Box/Output/your_image.png", "rb") as f:
+    img_blob = f.read()
+
+image_base64 = base64.b64encode(img_blob).decode('utf-8')
+html_img = f'<img src="data:image/png;base64,{image_base64}" width="400"/>'
+
+df = pd.DataFrame({
+    "Report_HTML": [html_img]
+})
+
+Alteryx.write(df, 1)
