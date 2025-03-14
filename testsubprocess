@@ -1,3 +1,15 @@
+
+ Tableau 社区论坛：
+
+	•	https://community.tableau.com/s/question/0D54T00000C6ns3SAB/how-to-export-multiple-filter-values-using-tabcmd
+	•	https://community.tableau.com/s/question/0D54T00000C6o2TSAR/how-to-export-view-using-tabcmd-with-multiple-filters
+
+里面有用户遇到一样的困扰——用 URL 拼多个 filter，结果只生效第一个，最后发现根本原因就是视图的 filter 是“Single Value”，不是 Multiple Values。
+
+
+
+
+
 import subprocess
 
 # 参数
