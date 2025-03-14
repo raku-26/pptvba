@@ -1,3 +1,75 @@
+
+import subprocess
+
+# 参数设置（你只需要改这些）
+arg1 = "python"                  # view 名称
+arg2 = "Region"                  # 第一个过滤器名
+arg3 = "Central,East,West"       # 第一个过滤器值（逗号分隔）
+arg4 = "segment"                # 第二个过滤器名
+arg5 = "Furniture,Technology"    # 第二个过滤器值（逗号分隔）
+arg6 = "start"                  # 参数名
+arg7 = "ll2024"                 # 参数值
+arg8 = "OutputImage"            # 导出的图片文件名
+
+# Tableau Server 配置
+server_url = "https://test.tableau.com/"
+site_name = "test"
+token_name = "test"
+token_value = "test"
+
+# 拼接 filters 和参数
+filter_parts = []
+
+# 多个 Region 值
+for v in arg3.split(","):
+    filter_parts.append(f"{arg2}={v.strip()}")
+
+# 多个 segment 值
+for v in arg5.split(","):
+    filter_parts.append(f"{arg4}={v.strip()}")
+
+# 添加参数
+filter_parts.append(f"Parameters.{arg6}={arg7}")
+
+# 拼接完整视图路径 URL
+nname = f"{arg1}/Sheet3?" + "&".join(filter_parts)
+
+# 打印调试：你可以看到最终 URL 拼得是否正确
+print("Final URL for tabcmd export:")
+print(nname)
+
+# 输出文件路径
+output_folder = "Z:/Box/"
+output_file = f"{output_folder}test/{arg8}_{arg7}.png"
+
+# 执行 tabcmd 登录
+subprocess.run([
+    "tabcmd", "login",
+    "-s", server_url,
+    "-t", site_name,
+    "--token-name", token_name,
+    "--token-value", token_value,
+    "--no-certcheck"
+])
+
+# 执行 tabcmd 导出
+subprocess.run([
+    "tabcmd", "export", nname,
+    "--png", "-f", output_folder,
+    "--filename", output_file,
+    "--no-certcheck"
+])
+
+
+
+
+
+
+
+
+
+
+
 import subprocess
 
 # 参数（照你给的）
