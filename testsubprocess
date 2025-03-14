@@ -1,6 +1,69 @@
 
 import subprocess
 
+# =========【参数设置部分】=========
+arg1 = "python"                  # view 名称
+arg2 = "Region"                  # 第一个过滤器名
+arg3 = "Central,East,West"       # 第一个过滤器值（多个值用逗号隔开）
+arg4 = "segment"                # 第二个过滤器名
+arg5 = "Furniture,Technology"    # 第二个过滤器值（多个值用逗号隔开）
+arg6 = "start"                  # 参数名
+arg7 = "ll2024"                 # 参数值
+arg8 = "OutputImage"            # 导出的图片文件名
+
+# =========【Tabcmd 登录相关配置】=========
+server_url = "https://test.tableau.com/"
+site_name = "test"
+token_name = "test"
+token_value = "test"
+
+# =========【构建过滤器部分（修改点）】=========
+# 【修改点 1】把多个 filter 值拼成用逗号隔开的字符串（不是重复字段）
+region_filter = f"{arg2}=" + ",".join([v.strip() for v in arg3.split(",")])     # Region=Central,East,West
+segment_filter = f"{arg4}=" + ",".join([v.strip() for v in arg5.split(",")])   # segment=Furniture,Technology
+
+# =========【构建参数部分（和之前一样）=========
+parameter_part = f"Parameters.{arg6}={arg7}"    # Parameters.start=ll2024
+
+# =========【拼接完整视图路径 URL（修改点）】=========
+# 【修改点 2】这里用逗号拼接好的值来构建 URL
+filter_parts = [region_filter, segment_filter, parameter_part]
+nname = f"{arg1}/Sheet3?" + "&".join(filter_parts)
+
+# =========【打印 URL（新增建议）】=========
+print("Final URL passed to tabcmd:")
+print(nname)
+
+# =========【输出文件配置（和之前一样）=========
+output_folder = "Z:/Box/"
+output_file = f"{output_folder}test/{arg8}_{arg7}.png"
+
+# =========【Tabcmd 登录命令（和之前一样）=========
+subprocess.run([
+    "tabcmd", "login",
+    "-s", server_url,
+    "-t", site_name,
+    "--token-name", token_name,
+    "--token-value", token_value,
+    "--no-certcheck"
+])
+
+# =========【Tabcmd 导出命令（和之前一样）=========
+subprocess.run([
+    "tabcmd", "export", nname,
+    "--png", "-f", output_folder,
+    "--filename", output_file,
+    "--no-certcheck"
+])
+
+
+
+
+
+
+
+import subprocess
+
 # 参数设置（你只需要改这些）
 arg1 = "python"                  # view 名称
 arg2 = "Region"                  # 第一个过滤器名
