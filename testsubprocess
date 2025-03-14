@@ -1,3 +1,58 @@
+import subprocess
+
+# 参数（照你给的）
+arg1 = "python"         # view 名
+arg2 = "Region"         # 第一个过滤器
+arg3 = "Central,East,West"  # 第一个过滤器的多个值（逗号分隔）
+arg4 = "segment"        # 第二个过滤器
+arg5 = "Furniture,Technology"  # 第二个过滤器的多个值（逗号分隔）
+arg6 = "start"          # 参数名
+arg7 = "ll2024"         # 参数值
+arg8 = "OutputImage"    # 输出文件名
+
+# 拼 URL 的核心代码
+filter_parts = []
+
+# 拆第一个过滤器多个值 → Region=xxx
+for v in arg3.split(","):
+    filter_parts.append(f"{arg2}={v.strip()}")
+
+# 拆第二个过滤器多个值 → segment=xxx
+for v in arg5.split(","):
+    filter_parts.append(f"{arg4}={v.strip()}")
+
+# 加参数 → Parameters.start=ll2024
+filter_parts.append(f"Parameters.{arg6}={arg7}")
+
+# 拼完整 URL
+nname = f"{arg1}/Sheet3?" + "&".join(filter_parts)
+
+# 输出文件名
+output_file = f"Z:/Box/test/{arg8}_{arg7}.png"
+output_folder = "Z:/Box/"
+
+# 登录
+subprocess.run([
+    "tabcmd", "login",
+    "-s", "https://test.tableau.com/",
+    "-t", "test",
+    "--token-name", "test",
+    "--token-value", "test",
+    "--no-certcheck"
+])
+
+# 导出
+subprocess.run([
+    "tabcmd", "export", nname,
+    "--png", "-f", output_folder,
+    "--filename", output_file,
+    "--no-certcheck"
+])
+
+
+
+
+
 # 拆第一个过滤器多个值 → Region=xxx
 for v in arg3.split(","):
     filter_parts.append(f"{arg2}={v.strip()}")
