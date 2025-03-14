@@ -1,5 +1,60 @@
 import subprocess
 
+# 参数
+arg1 = "SalesView"         # view 名
+arg2 = "Region"            # 第一个filter名
+arg3 = "Central,East,West" # 第一个filter值（多个用逗号隔开）
+arg4 = "Category"          # 第二个filter名
+arg5 = "Furniture,Technology"  # 第二个filter值（也用逗号隔开）
+arg6 = "YearParam"         # 参数名
+arg7 = "2024"              # 参数值
+arg8 = "OutputImage"       # 文件名
+
+# 构建 filter 参数
+filter_list = []
+
+for v in arg3.split(","):
+    filter_list.append(f"{arg2}={v.strip()}")  # Region=Central, Region=East,...
+
+for v in arg5.split(","):
+    filter_list.append(f"{arg4}={v.strip()}")  # Category=Furniture, Category=Technology,...
+
+# 添加参数
+filter_list.append(f"Parameters.{arg6}={arg7}")
+
+# 拼接完整视图路径
+nname = f"{arg1}/Sheet3?" + "&".join(filter_list)
+
+# 输出文件
+output_file = f"Z:/Box/test/{arg8}_{arg7}.png"
+output_folder = "Z:/Box/"
+
+# 登录命令
+subprocess.run([
+    "tabcmd", "login",
+    "-s", "https://test.tableau.com/",
+    "-t", "test",
+    "--token-name", "test",
+    "--token-value", "test",
+    "--no-certcheck"
+])
+
+# 导出命令
+subprocess.run([
+    "tabcmd", "export", nname,
+    "--png", "-f", output_folder,
+    "--filename", output_file,
+    "--no-certcheck"
+])
+
+
+
+
+
+
+
+import subprocess
+
 try:
     subprocess.run(["my_command"], check=True)
 except subprocess.CalledProcessError as e:
