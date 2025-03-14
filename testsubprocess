@@ -1,3 +1,20 @@
+# 拆第一个过滤器多个值 → Region=xxx
+for v in arg3.split(","):
+    filter_parts.append(f"{arg2}={v.strip()}")
+
+# 拆第二个过滤器多个值 → segment=xxx
+for v in arg5.split(","):
+    filter_parts.append(f"{arg4}={v.strip()}")
+
+# 加参数 → Parameters.start=ll2024
+filter_parts.append(f"Parameters.{arg6}={arg7}")
+
+# 拼完整 URL
+
+
+
+
+
 
  Tableau 社区论坛：
 
