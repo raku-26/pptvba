@@ -1,3 +1,35 @@
+import pandas as pd
+from boxsdk import JWTAuth, Client
+import io
+
+# Step 1: 你的 DataFrame
+df = pd.DataFrame({
+    'Name': ['Alice', 'Bob'],
+    'Age': [25, 30]
+})
+
+# Step 2: 认证 Box API（用 JWT 配置）
+auth = JWTAuth.from_settings_file('your_jwt_config.json')
+client = Client(auth)
+
+# Step 3: 创建 Excel 文件到内存中
+excel_buffer = io.BytesIO()
+df.to_excel(excel_buffer, index=False, engine='openpyxl')
+excel_buffer.seek(0)
+
+# Step 4: 选择 Box 中的目标文件夹（如根目录）
+folder_id = '0'  # 根目录；你也可以用其他具体文件夹的 ID
+
+# Step 5: 上传为文件
+file_name = 'output.xlsx'
+uploaded_file = client.folder(folder_id).upload_stream(excel_buffer, file_name)
+
+print(f"文件已上传到 Box：{uploaded_file.name} (ID: {uploaded_file.id})")
+
+
+
+
+
 import subprocess
 import base64
 
