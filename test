@@ -1,3 +1,57 @@
+
+import psycopg2
+
+# 接続情報（自分の環境に合わせて修正）
+host = "localhost"
+port = 5432
+dbname = "your_database"
+user = "your_username"
+password = "your_password"
+schema_name = "public"
+table_name = "postal_grade_data"
+
+try:
+    # PostgreSQL に接続
+    conn = psycopg2.connect(
+        host=host,
+        port=port,
+        dbname=dbname,
+        user=user,
+        password=password
+    )
+    cursor = conn.cursor()
+
+    # 1. 行数（レコード数）を取得
+    count_sql = f"SELECT COUNT(*) FROM {schema_name}.{table_name};"
+    cursor.execute(count_sql)
+    row_count = cursor.fetchone()[0]
+    print(f"レコード件数：{row_count} 件")
+
+    # 2. テーブルサイズを取得（人間が読める形式）
+    size_sql = f"""
+        SELECT
+            pg_size_pretty(pg_total_relation_size('{schema_name}.{table_name}')) AS total_size,
+            pg_size_pretty(pg_relation_size('{schema_name}.{table_name}')) AS table_size,
+            pg_size_pretty(pg_indexes_size('{schema_name}.{table_name}')) AS index_size;
+    """
+    cursor.execute(size_sql)
+    size_result = cursor.fetchone()
+
+    print(f"合計サイズ      ：{size_result[0]}")
+    print(f"テーブル本体    ：{size_result[1]}")
+    print(f"インデックス部分：{size_result[2]}")
+
+except Exception as e:
+    print("エラーが発生しました：", e)
+
+finally:
+    if 'conn' in locals() and conn:
+        cursor.close()
+        conn.close()
+        print("データベース接続を終了しました。")
+
+
+
 import pandas as pd
 import psycopg2
 
