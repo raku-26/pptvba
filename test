@@ -1,3 +1,10 @@
+curl --header "PRIVATE-TOKEN: YOUR_TOKEN" -O "THE_LINK_YOU_GOT"
+
+
+
+
+
+
 import requests
 import os
 
