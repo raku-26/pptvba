@@ -1,4 +1,59 @@
 
+
+import requests
+
+# === 配置 ===
+GITLAB_URL = "https://aaa-aaa-viewer.rmb-ccc.jp"
+PROJECT_ID = 59
+ACCESS_TOKEN = "你的TOKEN"
+SEARCH_FILE = "ccc.md"   # 你要找的文件名
+
+headers = {"PRIVATE-TOKEN": ACCESS_TOKEN}
+
+def get_branches():
+    """获取所有分支"""
+    url = f"{GITLAB_URL}/api/v4/projects/{PROJECT_ID}/repository/branches"
+    resp = requests.get(url, headers=headers)
+    resp.raise_for_status()
+    return [b["name"] for b in resp.json()]
+
+def list_files(ref):
+    """列出某个分支的所有文件（递归）"""
+    url = f"{GITLAB_URL}/api/v4/projects/{PROJECT_ID}/repository/tree"
+    params = {"ref": ref, "recursive": True, "per_page": 100}
+    resp = requests.get(url, headers=headers, params=params)
+    resp.raise_for_status()
+    return resp.json()
+
+def search_file_in_all_branches():
+    branches = get_branches()
+    print(f"✅ 找到 {len(branches)} 个分支，开始搜索 `{SEARCH_FILE}` ...\n")
+
+    found_results = []
+
+    for branch in branches:
+        print(f"🔍 正在检查分支: {branch} ...")
+        try:
+            files = list_files(branch)
+            for f in files:
+                if f["type"] == "blob" and f["path"].endswith(SEARCH_FILE):
+                    found_results.append((branch, f["path"]))
+        except Exception as e:
+            print(f"⚠️ 无法读取分支 {branch}: {e}")
+
+    if found_results:
+        print("\n✅ 找到以下匹配结果：\n")
+        for branch, path in found_results:
+            print(f"📌 分支: {branch}  | 路径: {path}")
+    else:
+        print("\n❌ 在所有分支中都没有找到 `ccc.md`")
+
+if __name__ == "__main__":
+    search_file_in_all_branches()
+
+
+
+
 import requests
 import json
 
