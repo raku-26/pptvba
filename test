@@ -1,3 +1,128 @@
+明白了！我们用你描述的占位符 完整还原结构，一步一步拆分。
+
+⸻
+
+✅ 你给的原始 URL（占位符版）
+
+aaa-aaa-viewer.rmb-ccc.jp/root/cccc/-/blob/demo/aaa/aaa/ccc.md
+
+拆解后结构是：
+	•	域名
+
+aaa-aaa-viewer.rmb-ccc.jp
+
+
+	•	项目路径
+
+root/cccc
+
+
+	•	分支名
+
+demo  ← 在 blob 后面紧跟的就是分支名
+
+
+	•	文件路径
+
+aaa/aaa/ccc.md
+
+
+
+⸻
+
+✅ GitLab API 规则
+
+API 下载必须变成：
+
+https://<域名>/api/v4/projects/<URL_ENCODED_PROJECT_PATH>/repository/files/<URL_ENCODED_FILE_PATH>/raw?ref=<BRANCHNAME>
+
+必须转义 / 为 %2F
+	•	root/cccc → root%2Fcccc ✅
+	•	aaa/aaa/ccc.md → aaa%2Faaa%2Fccc.md ✅
+
+⸻
+
+✅ 转换后的 API URL
+
+所以它应该变成：
+
+https://aaa-aaa-viewer.rmb-ccc.jp/api/v4/projects/root%2Fcccc/repository/files/aaa%2Faaa%2Fccc.md/raw?ref=demo
+
+
+⸻
+
+✅ 最终 curl 命令
+
+curl --header "PRIVATE-TOKEN: <你的TOKEN>" ^
+     -O "https://aaa-aaa-viewer.rmb-ccc.jp/api/v4/projects/root%2Fcccc/repository/files/aaa%2Faaa%2Fccc.md/raw?ref=demo"
+
+✅ 这样就应该返回真正的 ccc.md 文件，而不是 404 或 HTML。
+
+⸻
+
+✅ 但是，有两个可能的坑
+	1.	项目路径不一定真是 root/cccc
+	•	可能其实是顶级项目 cccc（不要 root/）
+	•	你可以试一下：
+
+curl --header "PRIVATE-TOKEN: <token>" \
+"https://aaa-aaa-viewer.rmb-ccc.jp/api/v4/projects/cccc"
+
+
+	2.	分支 demo 可能不是默认分支
+	•	需要确认 demo 真的存在：
+
+curl --header "PRIVATE-TOKEN: <token>" \
+"https://aaa-aaa-viewer.rmb-ccc.jp/api/v4/projects/root%2Fcccc/repository/branches"
+
+
+
+⸻
+
+✅ 保险做法 → 用项目 ID，避免路径猜错
+
+可以直接列出你有权限的所有项目 ID：
+
+curl --header "PRIVATE-TOKEN: <token>" \
+"https://aaa-aaa-viewer.rmb-ccc.jp/api/v4/projects?membership=true&per_page=100"
+
+然后找到 cccc 的 id，用 ID 下载，100% 不会错：
+
+https://aaa-aaa-viewer.rmb-ccc.jp/api/v4/projects/<ID>/repository/files/aaa%2Faaa%2Fccc.md/raw?ref=demo
+
+
+⸻
+
+✅ 你现在可以怎么试
+	1.	先用路径 root/cccc 试一下：
+
+curl --header "PRIVATE-TOKEN: <token>" \
+"https://aaa-aaa-viewer.rmb-ccc.jp/api/v4/projects/root%2Fcccc"
+
+	2.	如果 404，再试顶级项目 cccc：
+
+curl --header "PRIVATE-TOKEN: <token>" \
+"https://aaa-aaa-viewer.rmb-ccc.jp/api/v4/projects/cccc"
+
+	3.	都不行，就列项目 ID，找到真实路径：
+
+curl --header "PRIVATE-TOKEN: <token>" \
+"https://aaa-aaa-viewer.rmb-ccc.jp/api/v4/projects?membership=true&per_page=100"
+
+
+⸻
+
+✅ 要不要我帮你一次性生成
+	•	用路径 root/cccc 的 curl 命令
+	•	用路径 cccc 的 curl 命令
+	•	用项目 ID 的 curl 模板
+
+这样你一步步试，找到哪个项目路径才对？
+
+👉 要不要我直接给你 三个命令一步一步排查？
+
+
+
 
 curl --header "PRIVATE-TOKEN: <你的TOKEN>" ^
      -O "https://aaa-aaa-viewer.rmb-ccc.jp/api/v4/projects/root%2Fcccc/repository/files/aaa%2Faaa%2Fccc.md/raw?ref=demo"
