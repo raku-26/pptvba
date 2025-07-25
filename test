@@ -1,5 +1,60 @@
 
+import requests
+import urllib.parse
 
+# === 配置区 ===
+GITLAB_URL = "https://gitlab.com"   # 如果是自建GitLab，改成自己的域名
+ACCESS_TOKEN = "YOUR_TOKEN_HERE"   # 你的GitLab Personal Access Token
+PROJECT_PATH = "group/project"     # 项目的命名空间路径，例如 myteam/myrepo
+FILE_PATH = "docs/example.md"      # 仓库里的文件路径
+BRANCH = "main"                    # 分支名，比如 main / master
+
+def check_token():
+    """检查 GitLab Token 是否有效"""
+    url = f"{GITLAB_URL}/api/v4/user"
+    headers = {"PRIVATE-TOKEN": ACCESS_TOKEN}
+    print(f"🔍 正在检查 Token 是否有效...")
+
+    resp = requests.get(url, headers=headers)
+    
+    if resp.status_code == 200:
+        try:
+            user_info = resp.json()
+            print(f"✅ Token 有效，用户：{user_info.get('username')} (ID {user_info.get('id')})")
+            return True
+        except Exception as e:
+            print(f"⚠️ Token 响应不是有效 JSON，可能是 GitLab HTML 页面")
+            print(resp.text[:200])  # 打印前200字符
+            return False
+    else:
+        print(f"❌ Token 无效或无权限，状态码 {resp.status_code}")
+        print(resp.text)
+        return False
+
+def download_file():
+    """用 API 下载文件"""
+    encoded_project = urllib.parse.quote(PROJECT_PATH, safe="")
+    encoded_file = urllib.parse.quote(FILE_PATH, safe="")
+    api_url = f"{GITLAB_URL}/api/v4/projects/{encoded_project}/repository/files/{encoded_file}/raw?ref={BRANCH}"
+
+    headers = {"PRIVATE-TOKEN": ACCESS_TOKEN}
+    print(f"🔍 通过 API 下载文件：{FILE_PATH}")
+    resp = requests.get(api_url, headers=headers)
+
+    if resp.status_code == 200:
+        filename = FILE_PATH.split("/")[-1]
+        with open(filename, "wb") as f:
+            f.write(resp.content)
+        print(f"✅ 文件下载成功：{filename}")
+    else:
+        print(f"❌ 下载失败，状态码 {resp.status_code}")
+        print(resp.text)
+
+if __name__ == "__main__":
+    if check_token():
+        download_file()
+    else:
+        print("⚠️ 请检查 Token 是否正确，并确认已勾选 read_repository 权限。")
 
 
 import requests
