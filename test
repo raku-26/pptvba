@@ -1,4 +1,40 @@
 
+
+import requests
+import urllib.parse
+
+# ============ 你的参数 ============
+project_id = 20
+branch_name = "demo/table"  # 这个分支名有 '/', API 需要 URL Encode
+file_path = "port/table/xxx/yyy/target.md"  # 这里换成你最终确定的路径
+token = "你的TOKEN"
+base_url = "https://aaa-aaa-viewer.rmb-ccc.jp"
+
+# ============ 自动 URL 转义 ============
+encoded_branch = urllib.parse.quote(branch_name, safe='')
+encoded_path = urllib.parse.quote(file_path, safe='')
+
+# API URL
+api_url = f"{base_url}/api/v4/projects/{project_id}/repository/files/{encoded_path}/raw?ref={encoded_branch}"
+headers = {"PRIVATE-TOKEN": token}
+
+print(f"🔗 下载链接: {api_url}")
+
+# 请求下载
+resp = requests.get(api_url, headers=headers)
+
+if resp.status_code == 200:
+    # 保存文件
+    local_filename = file_path.split("/")[-1]  # 自动取最后的文件名
+    with open(local_filename, "wb") as f:
+        f.write(resp.content)
+    print(f"✅ 下载完成: {local_filename}")
+else:
+    print(f"❌ 下载失败: {resp.status_code}")
+    print(resp.text)
+
+
+
 import requests
 
 # === GitLab 配置 ===
