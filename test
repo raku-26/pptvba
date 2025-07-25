@@ -1,3 +1,10 @@
+
+curl --header "PRIVATE-TOKEN: <你的TOKEN>" ^
+     -O "https://aaa-aaa-viewer.rmb-ccc.jp/api/v4/projects/root%2Fcccc/repository/files/aaa%2Faaa%2Fccc.md/raw?ref=demo"
+
+
+
+
 明白了！下载之后得到 404 Not Found（你说的 Alla404NonFund 应该是 GitLab 返回的 404 Not Found 页面）。
 
 这说明 GitLab API 请求成功了，但它找不到这个文件。
