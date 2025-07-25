@@ -1,3 +1,59 @@
+
+
+明白了！我们现在信息已经完整了：
+	•	✅ 项目 ID：59
+	•	✅ 分支名：demo（blob/ 后面那个）
+	•	✅ 文件路径：aaa/bbb/ccc.md
+
+接下来只需要把文件路径里的 / 转义成 %2F，就可以拼出最终下载 API。
+
+⸻
+
+✅ 转义后的文件路径
+
+aaa/bbb/ccc.md  →  aaa%2Fbbb%2Fccc.md
+
+
+⸻
+
+✅ 最终下载 API URL
+
+https://aaa-aaa-viewer.rmb-ccc.jp/api/v4/projects/59/repository/files/aaa%2Fbbb%2Fccc.md/raw?ref=demo
+
+
+⸻
+
+✅ 最终 curl 命令
+
+curl --header "PRIVATE-TOKEN: <你的TOKEN>" ^
+     -O "https://aaa-aaa-viewer.rmb-ccc.jp/api/v4/projects/59/repository/files/aaa%2Fbbb%2Fccc.md/raw?ref=demo"
+
+✅ 执行后就会下载到当前目录，文件名 ccc.md，里面就是 Markdown 内容，而不是 HTML 或 404。
+
+⸻
+
+✅ 总结你需要做的
+
+1️⃣ 你已经有 id=59 ✅
+2️⃣ 你已经知道分支是 demo ✅
+3️⃣ 文件路径是 aaa/bbb/ccc.md ✅
+
+直接跑上面这条 curl 命令就能成功。
+
+⸻
+
+✅ 进阶
+
+如果以后还有别的文件，只要换 aaa/bbb/xxx.md → aaa%2Fbbb%2Fxxx.md 就行，项目 ID 59 和分支 demo 不变。
+
+⸻
+
+要不要我再给你一个小命令，自动把 aaa/bbb/ccc.md 这种路径转成 aaa%2Fbbb%2Fccc.md，让你以后不用手动改 %2F？
+
+还是先直接跑上面的 curl 看能否成功下载？
+
+
+
 明白了！我们用你描述的占位符 完整还原结构，一步一步拆分。
 
 ⸻
