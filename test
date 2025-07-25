@@ -1,3 +1,105 @@
+明白，用项目 ID 还是 404，那就说明还有一个环节没完全对上，我们现在一步步精确排查问题，直到找到原因。
+
+⸻
+
+✅ 目前我们确定的
+
+✅ 项目 ID = 59 是对的（GitLab 已经返回 JSON）
+✅ 分支名 demo 看起来没问题（从 /blob/demo/ 取到）
+✅ 文件路径 aaa/bbb/ccc.md 看似正确
+
+但是 API 还是 404 → 说明 GitLab 还是找不到文件。
+
+⸻
+
+✅ 404 可能剩下的两个原因
+	1.	文件路径写法不对（大小写/目录结构）
+	•	可能实际路径是 AAA/bbb/ccc.md 或 aaa/bbb/CCC.md
+	•	或者中间还有一层 src/aaa/bbb/ccc.md
+	•	GitLab 对路径大小写敏感
+	2.	分支 demo 不是真实分支名
+	•	可能实际是 Demo（大小写不同）
+	•	可能 blob/demo 其实是一个 tag 或 commit，不是分支
+
+⸻
+
+✅ 下一步 → 精确确认真实路径 & 分支
+
+我们直接用 API 列出仓库的文件树，看看真实的路径长什么样。
+
+⸻
+
+1️⃣ 列出项目 59 所有分支
+
+curl --header "PRIVATE-TOKEN: <token>" \
+"https://aaa-aaa-viewer.rmb-ccc.jp/api/v4/projects/59/repository/branches"
+
+✅ 你会看到类似：
+
+[
+  { "name": "main", ... },
+  { "name": "demo", ... },
+  ...
+]
+
+→ 这样我们确认 demo 是不是一个真实分支名，还是写错大小写。
+
+⸻
+
+2️⃣ 列出 demo 分支下的 aaa 目录
+
+curl --header "PRIVATE-TOKEN: <token>" \
+"https://aaa-aaa-viewer.rmb-ccc.jp/api/v4/projects/59/repository/tree?ref=demo&path=aaa"
+
+✅ 它会返回 demo 分支下 aaa 目录里的文件/子目录，比如：
+
+[
+  { "type": "tree", "name": "bbb" }
+]
+
+如果没返回，说明 aaa 这个目录本身就不存在（可能大小写错了）。
+
+⸻
+
+3️⃣ 继续列 bbb 目录
+
+curl --header "PRIVATE-TOKEN: <token>" \
+"https://aaa-aaa-viewer.rmb-ccc.jp/api/v4/projects/59/repository/tree?ref=demo&path=aaa/bbb"
+
+✅ 它会显示 ccc.md 是否真的存在。
+
+⸻
+
+✅ 如果能看到 ccc.md
+
+那就说明真实路径是 aaa/bbb/ccc.md，下载命令才是正确的：
+
+https://.../projects/59/repository/files/aaa%2Fbbb%2Fccc.md/raw?ref=demo
+
+如果没看到，那就说明：
+	•	路径大小写不对
+	•	或者还有多一层目录
+	•	或者这个文件根本不在 demo 分支
+
+⸻
+
+✅ 要不要我给你完整排查命令集？
+
+我可以一次性给你 3 条命令：
+
+1️⃣ 列出所有分支 → 确认 demo 是否真实存在
+2️⃣ 列出 demo 分支下 aaa 目录 → 确认有无 bbb
+3️⃣ 列出 aaa/bbb 目录 → 确认有无 ccc.md
+
+跑完这三条命令，我们就能 100% 确定路径问题！
+
+⸻
+
+👉 你要不要我直接给你这 3 条命令一步步排查，找出真正的文件路径？
+
+
+
+
 
 
 明白了！我们现在信息已经完整了：
