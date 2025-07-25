@@ -1,3 +1,37 @@
+import requests
+import os
+
+# === Configuration ===
+GITLAB_URL = "https://gitlab.com"  # Replace with your GitLab server URL if it's self-hosted
+PROJECT_ID = "12345678"            # Replace with your GitLab project ID
+FILE_PATH = "docs/example.md"      # Path to the file inside the repo
+REF = "main"                       # Branch name or commit hash
+ACCESS_TOKEN = "your_personal_access_token"
+
+# Output file name
+OUTPUT_FILE = os.path.basename(FILE_PATH)
+
+# === GitLab API endpoint ===
+API_URL = f"{GITLAB_URL}/api/v4/projects/{PROJECT_ID}/repository/files/{requests.utils.quote(FILE_PATH, safe='')}/raw?ref={REF}"
+
+# === Send request ===
+headers = {"PRIVATE-TOKEN": ACCESS_TOKEN}
+response = requests.get(API_URL, headers=headers)
+
+if response.status_code == 200:
+    with open(OUTPUT_FILE, "wb") as f:
+        f.write(response.content)
+    print(f"✅ File downloaded successfully: {OUTPUT_FILE}")
+else:
+    print(f"❌ Failed to download file. Status: {response.status_code}")
+    print(response.text)
+
+
+
+
+
+
+
 
 import psycopg2
 
