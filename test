@@ -1,3 +1,9 @@
+
+curl --header "PRIVATE-TOKEN: <你的Token>" ^
+     -O "https://AABBBCCCDDDEEFF.jp/api/v4/projects/root%2Fdemo-proj/repository/files/demo%2Ftutorial%2Fguide.md/raw?ref=main"
+
+
+
 明白了！你的公司/客户的 GitLab 域名是类似：
 
 https://devops.xxx.jp
