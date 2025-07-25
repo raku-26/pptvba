@@ -1,3 +1,91 @@
+明白了！你的公司/客户的 GitLab 域名是类似：
+
+https://devops.xxx.jp
+
+也就是一个日本后缀 .jp 的 内部自建 GitLab，所以我们必须用这个域名来调用 API，而不能用 https://gitlab.com。
+
+✅ 好消息是：GitLab API 在 .jp 域名下一样能用，只要你把域名替换正确。
+
+⸻
+
+✅ 第一步：先验证 Token 是否对 .jp 域名有效
+
+请在命令行里运行（把 <你的Token> 换成你的真实 token）：
+
+curl --header "PRIVATE-TOKEN: <你的Token>" https://devops.xxx.jp/api/v4/user
+
+可能的结果：
+	•	✅ 如果返回 JSON，类似：
+
+{"id":123,"username":"yourname","email":"xxx@company.jp"}
+
+说明：
+	•	域名正确
+	•	Token 有效
+	•	权限够
+
+	•	❌ 如果返回 HTML（带 <html> <body> 登录页） →
+	•	可能 Token 权限不足
+	•	可能 Token 输入错
+	•	也可能域名拼错
+
+⸻
+
+✅ 第二步：确定 GitLab API 下载文件的完整地址
+
+假设你的 GitLab 项目是：
+	•	命名空间/项目：myteam/myrepo
+	•	文件路径：docs/readme.md
+	•	分支名：main
+
+那么正确的 API 下载 URL 是：
+
+https://devops.xxx.jp/api/v4/projects/myteam%2Fmyrepo/repository/files/docs%2Freadme.md/raw?ref=main
+
+然后你可以直接用 curl 下载：
+
+curl --header "PRIVATE-TOKEN: <你的Token>" \
+     -O "https://devops.xxx.jp/api/v4/projects/myteam%2Fmyrepo/repository/files/docs%2Freadme.md/raw?ref=main"
+
+✅ 这样就能拿到真正的 Markdown 文件，而不会是 HTML 登录页面。
+
+⸻
+
+✅ 第三步：Python 脚本适配 .jp 域名
+
+把之前的脚本里的 GITLAB_URL 改成 https://devops.xxx.jp 就行，比如：
+
+GITLAB_URL = "https://devops.xxx.jp"   # ⚠️ 改成你们的域名
+ACCESS_TOKEN = "glpat-xxxxxxxxxxxxxxxx"
+PROJECT_PATH = "myteam/myrepo"
+FILE_PATH = "docs/readme.md"
+BRANCH = "main"
+
+运行后它就会访问：
+
+https://devops.xxx.jp/api/v4/projects/myteam%2Fmyrepo/repository/files/docs%2Freadme.md/raw?ref=main
+
+✅ 这样才能下载到真正的文件
+
+⸻
+
+✅ 下一步怎么做？
+
+1️⃣ 先验证 Token 是否有效
+
+curl --header "PRIVATE-TOKEN: <你的Token>" https://devops.xxx.jp/api/v4/user
+
+2️⃣ 如果能返回 JSON ✅ → 我帮你写好最终下载命令和 Python 代码
+3️⃣ 如果返回 HTML ❌ → 说明 Token 权限不足或域名不对，需要修正
+
+⸻
+
+👉 你要不要现在就先跑第 1 步 curl 命令，看能不能返回 JSON？
+如果可以，我直接给你完整下载脚本。
+
+要不要我给你一个 只输入 URL+Token 自动完成验证和下载的简易版脚本？
+
+
 
 import requests
 import urllib.parse
