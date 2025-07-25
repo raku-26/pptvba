@@ -3,6 +3,37 @@ import requests
 
 # === GitLab 配置 ===
 GITLAB_URL = "https://aaa-aaa-viewer.rmb-ccc.jp"
+PROJECT_ID = 20
+ACCESS_TOKEN = "你的TOKEN"
+
+# 只列出分支名里包含这个前缀的
+BRANCH_PREFIX = "demo/table"
+
+headers = {"PRIVATE-TOKEN": ACCESS_TOKEN}
+
+def get_branches():
+    """列出项目的所有分支，并过滤 demo/table 前缀"""
+    url = f"{GITLAB_URL}/api/v4/projects/{PROJECT_ID}/repository/branches"
+    resp = requests.get(url, headers=headers)
+    if resp.status_code == 200:
+        branches = resp.json()
+        filtered = [b["name"] for b in branches if b["name"].startswith(BRANCH_PREFIX)]
+        print(f"✅ 找到 {len(filtered)} 个分支，前缀是 `{BRANCH_PREFIX}`:\n")
+        for name in filtered:
+            print(f"- {name}")
+    else:
+        print(f"❌ 获取分支失败 {resp.status_code}")
+        print(resp.text)
+
+if __name__ == "__main__":
+    get_branches()
+
+
+
+import requests
+
+# === GitLab 配置 ===
+GITLAB_URL = "https://aaa-aaa-viewer.rmb-ccc.jp"
 PROJECT_ID = 59
 ACCESS_TOKEN = "你的TOKEN"
 
