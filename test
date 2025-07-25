@@ -1,3 +1,102 @@
+明白了！下载之后得到 404 Not Found（你说的 Alla404NonFund 应该是 GitLab 返回的 404 Not Found 页面）。
+
+这说明 GitLab API 请求成功了，但它找不到这个文件。
+
+出现 404 Not Found 的原因通常只有 三种，我们逐一排查：
+
+⸻
+
+✅ 1. 项目路径不对（最常见）
+
+GitLab API 里的项目路径必须是 URL Encode 之后的 namespace%2Fproject。
+	•	你原始 URL 里是 root/demo-proj，必须写成 root%2Fdemo-proj
+	•	如果你没转义 /，GitLab 认为你要找 root 这个项目 → 找不到 → 404
+
+确认方法
+
+curl --header "PRIVATE-TOKEN: <token>" \
+"https://AABBBCCCDDDEEFF.jp/api/v4/projects/root%2Fdemo-proj"
+
+✅ 如果能返回 JSON（项目详情），说明项目路径没问题
+❌ 如果还是 404，说明项目路径没写对或没转义
+
+⸻
+
+✅ 2. 分支名不对
+
+?ref=BRANCHNAME 里的分支名必须跟仓库里完全一致。
+	•	如果仓库默认分支是 master，但你写 main → 404
+	•	如果分支是 feature/demo-2025，要写 feature%2Fdemo-2025 → 404
+
+确认方法
+
+curl --header "PRIVATE-TOKEN: <token>" \
+"https://AABBBCCCDDDEEFF.jp/api/v4/projects/root%2Fdemo-proj/repository/branches"
+
+✅ 会列出所有分支（比如 main, master, develop）
+→ 你要用跟 /blob/<这里> 一模一样的分支名
+
+⸻
+
+✅ 3. 文件路径不对或没转义
+
+GitLab API 里的文件路径必须是仓库里的完整相对路径，并且 URL Encode。
+	•	docs/tutorial/readme.md → docs%2Ftutorial%2Freadme.md ✅
+	•	如果漏掉 tutorial 目录或大小写不一致 → 404
+	•	如果不转义 / → GitLab 认为是目录 → 404
+
+确认方法
+
+curl --header "PRIVATE-TOKEN: <token>" \
+"https://AABBBCCCDDDEEFF.jp/api/v4/projects/root%2Fdemo-proj/repository/tree?ref=main&path=docs/tutorial"
+
+✅ 如果能看到 readme.md → 路径对
+❌ 如果没有 → 路径错了
+
+⸻
+
+✅ 解决思路
+
+要避免 404，必须确认这 3 个关键：
+	1.	✅ 项目路径（root/demo-proj → root%2Fdemo-proj）
+	2.	✅ 分支名（blob/ 后面那个名字要精确一致）
+	3.	✅ 文件路径（demo/folder/file.md → demo%2Ffolder%2Ffile.md，且大小写正确）
+
+⸻
+
+✅ 建议你先跑 3 个排查命令
+
+1️⃣ 确认项目路径对不对
+
+curl --header "PRIVATE-TOKEN: <token>" \
+"https://AABBBCCCDDDEEFF.jp/api/v4/projects/root%2Fdemo-proj"
+
+2️⃣ 确认分支到底叫什么
+
+curl --header "PRIVATE-TOKEN: <token>" \
+"https://AABBBCCCDDDEEFF.jp/api/v4/projects/root%2Fdemo-proj/repository/branches"
+
+3️⃣ 确认文件路径到底对不对
+
+curl --header "PRIVATE-TOKEN: <token>" \
+"https://AABBBCCCDDDEEFF.jp/api/v4/projects/root%2Fdemo-proj/repository/tree?ref=main&path=demo/folder"
+
+	•	✅ 如果都能找到 → 再拼 API 下载 URL 就一定不会 404
+	•	❌ 如果有一个不对 → 修正后再试
+
+⸻
+
+✅ 你想让我怎么帮？
+	•	要不要我先给你排查命令（一步步确认项目、分支、路径），帮你找出到底哪一步错了？
+	•	还是直接帮你拿原始 URL 解析出正确的项目路径、分支、文件路径，并生成最终 curl 命令？
+
+👉 你要不要先跑第 1 步（确认项目路径），看能不能返回 JSON？
+
+
+
+
+
+
 
 import urllib.parse, os
 
