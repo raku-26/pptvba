@@ -1,4 +1,52 @@
+import requests
 
+# === 你的 GitLab 配置 ===
+GITLAB_URL = "https://aaa-aaa-viewer.rmb-ccc.jp"
+PROJECT_ID = 59  # 先用 59，如果之后确定是其他 ID 再换
+ACCESS_TOKEN = "你的TOKEN"
+
+headers = {"PRIVATE-TOKEN": ACCESS_TOKEN}
+
+def get_branches():
+    """获取所有分支名"""
+    url = f"{GITLAB_URL}/api/v4/projects/{PROJECT_ID}/repository/branches"
+    resp = requests.get(url, headers=headers)
+    resp.raise_for_status()
+    return [b["name"] for b in resp.json()]
+
+def list_files(ref):
+    """列出某分支下的所有文件（递归）"""
+    url = f"{GITLAB_URL}/api/v4/projects/{PROJECT_ID}/repository/tree"
+    params = {"ref": ref, "recursive": True, "per_page": 100}
+    resp = requests.get(url, headers=headers, params=params)
+    resp.raise_for_status()
+    return resp.json()
+
+def scan_all_md_files():
+    branches = get_branches()
+    print(f"✅ 发现 {len(branches)} 个分支，开始扫描所有 .md 文件...\n")
+
+    found_files = []
+
+    for branch in branches:
+        print(f"🔍 正在扫描分支: {branch}")
+        try:
+            files = list_files(branch)
+            for f in files:
+                if f["type"] == "blob" and f["path"].endswith(".md"):
+                    found_files.append((branch, f["path"]))
+        except Exception as e:
+            print(f"⚠️ 分支 {branch} 无法读取: {e}")
+
+    if found_files:
+        print("\n✅ 找到以下 .md 文件：\n")
+        for branch, path in found_files:
+            print(f"📌 分支: {branch} | 路径: {path}")
+    else:
+        print("\n❌ 所有分支都没找到任何 .md 文件")
+
+if __name__ == "__main__":
+    scan_all_md_files()
 
 import requests
 
