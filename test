@@ -1,5 +1,58 @@
 
 
+
+
+import requests
+import urllib.parse
+
+# === 配置区 ===
+GITLAB_URL = "https://gitlab.com"   # 如果是自建GitLab，改成自己的域名
+ACCESS_TOKEN = "YOUR_TOKEN_HERE"   # 你的GitLab Personal Access Token
+PROJECT_PATH = "group/project"     # 项目的命名空间路径，例如 myteam/myrepo
+FILE_PATH = "docs/example.md"      # 仓库里的文件路径
+BRANCH = "main"                    # 分支名，比如 main / master
+
+# === Step 1: 检查 Token 是否有效 ===
+def check_token():
+    url = f"{GITLAB_URL}/api/v4/user"
+    headers = {"PRIVATE-TOKEN": ACCESS_TOKEN}
+    print(f"🔍 检查 Token 是否有效...")
+    resp = requests.get(url, headers=headers)
+    if resp.status_code == 200:
+        user_info = resp.json()
+        print(f"✅ Token 有效，用户：{user_info['username']} (ID {user_info['id']})")
+        return True
+    else:
+        print(f"❌ Token 无效或无权限，状态码 {resp.status_code}")
+        print(resp.text)
+        return False
+
+# === Step 2: 用 API 下载文件 ===
+def download_file():
+    # GitLab API 下载地址需要 URL Encode
+    encoded_project = urllib.parse.quote(PROJECT_PATH, safe="")
+    encoded_file = urllib.parse.quote(FILE_PATH, safe="")
+    api_url = f"{GITLAB_URL}/api/v4/projects/{encoded_project}/repository/files/{encoded_file}/raw?ref={BRANCH}"
+
+    headers = {"PRIVATE-TOKEN": ACCESS_TOKEN}
+    print(f"🔍 通过 API 下载文件：{FILE_PATH}")
+    resp = requests.get(api_url, headers=headers)
+
+    if resp.status_code == 200:
+        filename = FILE_PATH.split("/")[-1]
+        with open(filename, "wb") as f:
+            f.write(resp.content)
+        print(f"✅ 文件下载成功：{filename}")
+    else:
+        print(f"❌ 下载失败，状态码 {resp.status_code}")
+        print(resp.text)
+
+if __name__ == "__main__":
+    if check_token():
+        download_file()
+    else:
+        print("⚠️ 请检查 Token 是否正确，并确认已勾选 read_repository 权限。")
+
 明白了！你已经在浏览器点了 “Raw” 按钮 → 右键复制链接 → 用 curl 下载，但结果还是 HTML（提示重定向或登录），说明：
 
 ✅ 这个文件在一个私有项目里
