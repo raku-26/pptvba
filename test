@@ -1,4 +1,42 @@
+import requests
+import urllib.parse
+import os
 
+# === 配置 ===
+project_id = 20
+branch_name = "demo/table"
+file_path = "port/table/docs/ccc.md"  # GitLab 中的完整路径
+token = "你的TOKEN"
+base_url = "https://aaa-aaa-viewer.rmb-ccc.jp"
+
+# 你要保存的目标目录（确保存在或可写）
+save_dir = "D:/GitLabDownloads/"
+
+# URL 转义
+encoded_branch = urllib.parse.quote(branch_name, safe='')
+encoded_path = urllib.parse.quote(file_path, safe='')
+
+# 拼 API URL
+api_url = f"{base_url}/api/v4/projects/{project_id}/repository/files/{encoded_path}/raw?ref={encoded_branch}"
+headers = {"PRIVATE-TOKEN": token}
+
+print(f"🔗 下载链接: {api_url}")
+
+# 请求下载
+resp = requests.get(api_url, headers=headers)
+
+if resp.status_code == 200:
+    # 只取最后文件名
+    filename = os.path.basename(file_path)
+    local_path = os.path.join(save_dir, filename)
+
+    # 保存
+    with open(local_path, "wb") as f:
+        f.write(resp.content)
+    print(f"✅ 下载完成: {local_path}")
+else:
+    print(f"❌ 下载失败: {resp.status_code}")
+    print(resp.text)
 
 import requests
 import urllib.parse
