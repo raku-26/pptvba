@@ -1,4 +1,25 @@
 
+import urllib.parse, os
+
+ACCESS_TOKEN = "glpat-你的TOKEN"
+
+raw_url = input("请输入客户给的 /blob/ URL: ").strip()
+
+parts = raw_url.split("/")
+domain = parts[2]
+proj_path = "%2F".join(parts[3:parts.index("-")])
+branch = parts[parts.index("blob") + 1]
+file_path = "%2F".join(parts[parts.index("blob") + 2:])
+filename = raw_url.split("/")[-1]
+
+api_url = f"https://{domain}/api/v4/projects/{proj_path}/repository/files/{file_path}/raw?ref={branch}"
+
+print(f"✅ 转换完成: {api_url}")
+os.system(f"curl --header \"PRIVATE-TOKEN: {ACCESS_TOKEN}\" -O \"{api_url}\"")
+
+
+
+
 curl --header "PRIVATE-TOKEN: <你的Token>" ^
      -O "https://AABBBCCCDDDEEFF.jp/api/v4/projects/root%2Fdemo-proj/repository/files/demo%2Ftutorial%2Fguide.md/raw?ref=main"
 
