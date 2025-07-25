@@ -1,4 +1,34 @@
 
+import requests
+import json
+
+# === 你的配置 ===
+GITLAB_URL = "https://aaa-aaa-viewer.rmb-ccc.jp"
+PROJECT_ID = 59
+ACCESS_TOKEN = "你的TOKEN"
+
+def list_branches():
+    api_url = f"{GITLAB_URL}/api/v4/projects/{PROJECT_ID}/repository/branches"
+    headers = {"PRIVATE-TOKEN": ACCESS_TOKEN}
+
+    resp = requests.get(api_url, headers=headers)
+    if resp.status_code == 200:
+        branches = resp.json()
+        print(f"✅ 这个项目共有 {len(branches)} 个分支:\n")
+        for b in branches:
+            name = b["name"]
+            default = "⭐ 默认分支" if b.get("default") else ""
+            commit_id = b["commit"]["short_id"]
+            print(f"- {name:30} (commit {commit_id}) {default}")
+    else:
+        print(f"❌ 获取分支失败: {resp.status_code}")
+        print(resp.text)
+
+if __name__ == "__main__":
+    list_branches()
+
+
+
 明白了！你在 feature/202407 分支下跑
 
 .../repository/tree?ref=feature%2F202407
