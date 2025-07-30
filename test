@@ -1,5 +1,46 @@
 
 
+import win32com.client as win32
+import os
+
+# === パスの設定 ===
+source_folder = "sources"
+src_path = os.path.abspath(os.path.join(source_folder, "sample.xlsx"))       # コピー元のExcelファイル
+dst_path = os.path.abspath(os.path.join(source_folder, "merged_test.xlsx"))  # 出力先のExcelファイル
+
+# ✅ 既に出力先ファイルが存在する場合、上書き確認を避けるため削除する
+if os.path.exists(dst_path):
+    os.remove(dst_path)
+
+# ✅ Excelアプリケーションを起動
+excel = win32.gencache.EnsureDispatch("Excel.Application")
+excel.Visible = True               # ✅ Excelウィンドウを表示（デバッグ用）
+excel.DisplayAlerts = False        # ✅ 上書き保存などの警告メッセージを表示しない
+
+# ✅ コピー元のExcelファイルを開く
+wb_src = excel.Workbooks.Open(src_path)
+sheet = wb_src.Sheets(1)           # ✅ 最初のシートを取得
+
+# ✅ 新しい空白のExcelブックを作成し、出力先として保存
+wb_dst = excel.Workbooks.Add()
+wb_dst.SaveAs(dst_path)            # ✅ 事前に保存しておかないとシートコピーが動作しない
+
+# ✅ シートをコピー（出力ファイルの最後に追加）
+sheet.Copy(After=wb_dst.Sheets(wb_dst.Sheets.Count))
+
+# ✅ コピー元のファイルを保存せずに閉じる
+wb_src.Close(False)
+
+# ✅ 出力ファイルを保存して閉じる
+wb_dst.Save()
+wb_dst.Close()
+
+# ✅ Excelアプリケーションを終了
+excel.Quit()
+
+print("✅ シートのコピー完了！保存先：", dst_path)
+
+
 import os
 import win32com.client as win32
 from glob import glob
