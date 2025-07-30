@@ -1,4 +1,61 @@
 
+import win32com.client as win32
+import os
+
+# === ソースファイルの設定 ===
+source_folder = "sources"  # Excelファイルを入れるフォルダ
+file_names = ["aaa.xlsx", "bbb.xlsx", "ccc.xlsx"]  # 各ファイルに1つのシートのみ（シート名＝ファイル名）
+
+# === 出力ファイルのパス ===
+dst_path = os.path.abspath(os.path.join(source_folder, "merged_all.xlsx"))
+
+# ✅ 出力ファイルがすでに存在する場合は削除（上書き確認を回避）
+if os.path.exists(dst_path):
+    os.remove(dst_path)
+
+# ✅ Excelアプリケーションを起動
+excel = win32.gencache.EnsureDispatch("Excel.Application")
+excel.Visible = True               # 🪟 Excelウィンドウを表示（デバッグ用）
+excel.DisplayAlerts = False        # ⚠️ 上書き確認などのダイアログを非表示
+
+# ✅ 空のExcelブックを新規作成し、一度保存（保存しないとシートのコピーができない）
+wb_dst = excel.Workbooks.Add()
+wb_dst.SaveAs(dst_path)
+
+# ✅ 各ソースファイルのシートを順番にコピー
+for file_name in file_names:
+    src_path = os.path.abspath(os.path.join(source_folder, file_name))
+    print(f"📥 コピー中: {file_name}")
+
+    # 元ファイルを開く
+    wb_src = excel.Workbooks.Open(src_path)
+    sheet = wb_src.Sheets(1)  # 最初のシートを取得（1つしかない想定）
+    original_name = sheet.Name  # 元のシート名を保持
+
+    # シートを出力ファイルの最後にコピー
+    sheet.Copy(After=wb_dst.Sheets(wb_dst.Sheets.Count))
+
+    # コピーされたシート（最後尾）に元のシート名をつける
+    try:
+        wb_dst.Sheets(wb_dst.Sheets.Count).Name = original_name
+    except Exception:
+        print(f"⚠️ シート名 \"{original_name}\" は無効な文字を含むか長すぎます")
+
+    # 元ファイルを保存せずに閉じる
+    wb_src.Close(False)
+
+# ✅ 出力ファイルを保存して閉じる
+wb_dst.Save()
+wb_dst.Close()
+excel.Quit()
+
+print(f"✅ 結合完了：保存先 → {dst_path}")
+
+
+
+
+
+
 
 import win32com.client as win32
 import os
