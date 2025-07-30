@@ -1,4 +1,17 @@
 
+# 開いていた場合は閉じる
+for wb in excel.Workbooks:
+    if wb.Name.lower() == "merged_all.xlsx":
+        wb.Close(False)
+
+# 少し待つ（ファイルハンドル解放のため）
+time.sleep(1)
+
+# 保存
+wb_dst.SaveAs(dst_path)
+
+
+
 
 try:
     wb_dst.Sheets(wb_dst.Sheets.Count).Name = original_name
