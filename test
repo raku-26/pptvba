@@ -1,4 +1,37 @@
 
+import win32com.client as win32
+import os
+
+excel = win32.gencache.EnsureDispatch("Excel.Application")
+excel.Visible = True  # 这次让它可见，方便调试
+
+# 修改成你实际的文件路径
+src_path = os.path.abspath("sources/sample.xlsx")
+dst_path = os.path.abspath("sources/merged_test.xlsx")
+
+# 打开源文件
+wb_src = excel.Workbooks.Open(src_path)
+sheet = wb_src.Sheets(1)
+
+# 新建空白目标文件
+wb_dst = excel.Workbooks.Add()
+wb_dst.SaveAs(dst_path)
+
+# 复制 sheet 到目标文件中
+sheet.Copy(After=wb_dst.Sheets(wb_dst.Sheets.Count))
+
+# 关闭并保存
+wb_src.Close(False)
+wb_dst.Save()
+wb_dst.Close()
+excel.Quit()
+
+print("✅ 测试完成")
+
+
+
+
+
 import os
 import win32com.client as win32
 from glob import glob
