@@ -1,4 +1,73 @@
 
+
+import os
+import win32com.client as win32
+from glob import glob
+
+# === 設定 ===
+source_folder = "sources"  # Excelファイルを入れておくフォルダ
+output_file = "merged_final.xlsx"
+output_path = os.path.abspath(os.path.join(source_folder, output_file))
+
+# === 既にファイルが存在する場合は削除 ===
+if os.path.exists(output_path):
+    os.remove(output_path)
+
+# === マージ対象のExcelファイルを取得 ===
+excel_files = [
+    f for f in glob(os.path.join(source_folder, "*.xlsx"))
+    if not f.endswith(output_file) and not os.path.basename(f).startswith("~$")
+]
+
+# === Excelアプリケーションを起動 ===
+excel = win32.gencache.EnsureDispatch("Excel.Application")
+excel.DisplayAlerts = False        # 🔕 警告メッセージを表示しない
+excel.Visible = False              # 🪟 非表示で実行
+
+# === 空のExcelファイルを作成して保存（保存しないとCopyできない） ===
+wb_target = excel.Workbooks.Add()
+wb_target.SaveAs(output_path)
+
+print(f"📁 統合ファイルを作成：{output_path}")
+
+# === 各Excelファイルの最初のシートをコピー ===
+for file_path in excel_files:
+    abs_path = os.path.abspath(file_path)
+    file_name = os.path.splitext(os.path.basename(file_path))[0]
+
+    print(f"📥 コピー中: {file_name}")
+
+    wb_source = excel.Workbooks.Open(abs_path)
+    sheet_to_copy = wb_source.Sheets(1)  # 最初のシートを取得
+    sheet_to_copy.Copy(After=wb_target.Sheets(wb_target.Sheets.Count))  # 最後にコピー
+    wb_source.Close(False)
+
+    # コピーされたシートをリネーム
+    try:
+        wb_target.Sheets(wb_target.Sheets.Count).Name = file_name[:31]
+    except Exception:
+        print(f"⚠️ シート名 \"{file_name}\" は無効な文字を含む可能性があります。")
+
+# === 空白シートがまだ残っていれば削除 ===
+if wb_target.Sheets.Count > len(excel_files):
+    try:
+        for sheet in wb_target.Sheets:
+            if sheet.UsedRange.Count == 1 and not sheet.UsedRange.Value:
+                sheet.Delete()
+    except:
+        pass  # 削除に失敗しても無視
+
+# === 保存して終了 ===
+wb_target.Save()
+wb_target.Close()
+excel.Quit()
+
+print(f"\n✅ 完了：すべてのシートを統合し保存しました → {output_path}")
+
+
+
+
+
 import win32com.client as win32
 import os
 
