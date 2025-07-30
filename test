@@ -1,4 +1,9 @@
 
+
+try:
+    wb_dst.Sheets(wb_dst.Sheets.Count).Name = original_name
+except Exception as e:
+    print(f"⚠️ シート名 \"{original_name}\" を設定できません: {e}")
 import win32com.client as win32
 import os
 
