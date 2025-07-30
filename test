@@ -1,3 +1,47 @@
+
+import os
+import pandas as pd
+from openpyxl import Workbook, load_workbook
+
+# === 1. 配置路径 ===
+source_file = "source.xlsx"           # 源文件路径
+source_sheet = "SheetA"               # 源 sheet 名
+
+folder_path = "folderA"               # 要创建的文件夹
+target_file_name = "target.xlsx"      # 目标文件名
+target_sheet_name = "com"             # 要写入的目标 sheet 名
+
+# === 2. 创建目标文件夹和空 Excel 文件 ===
+os.makedirs(folder_path, exist_ok=True)
+target_file_path = os.path.join(folder_path, target_file_name)
+
+if not os.path.exists(target_file_path):
+    wb = Workbook()
+    wb.save(target_file_path)
+    print(f"📁 已创建空白 Excel 文件：{target_file_path}")
+else:
+    print(f"📁 文件已存在，将在其上添加 sheet：{target_file_path}")
+
+# === 3. 读取源文件的 SheetA 数据（只数据不格式） ===
+df = pd.read_excel(source_file, sheet_name=source_sheet)
+
+# === 4. 打开目标 Excel 并写入新的 sheet "com" ===
+book = load_workbook(target_file_path)
+with pd.ExcelWriter(target_file_path, engine='openpyxl', mode='a') as writer:
+    writer.book = book
+
+    # 如果已存在同名 sheet，先删除它
+    if target_sheet_name in book.sheetnames:
+        del book[target_sheet_name]
+    
+    df.to_excel(writer, sheet_name=target_sheet_name, index=False)
+
+print(f"✅ 成功将 `{source_sheet}` 的内容复制为 `{target_sheet_name}` 写入 `{target_file_path}`")
+
+
+
+
+
 import requests
 import urllib.parse
 import os
