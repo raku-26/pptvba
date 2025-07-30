@@ -1,5 +1,68 @@
 
 import os
+import win32com.client as win32
+from glob import glob
+
+# === 設定 ===
+source_folder = "sources"  # 統合したいExcelファイルを保存するフォルダ
+output_file = "merged_final.xlsx"  # 出力ファイル名
+output_path = os.path.abspath(os.path.join(source_folder, output_file))  # 出力パス
+
+# === マージ対象のExcelファイルをすべて取得 ===
+excel_files = [
+    f for f in glob(os.path.join(source_folder, "*.xlsx"))
+    if not f.endswith(output_file) and not os.path.basename(f).startswith("~$")
+]
+
+# === Excelアプリケーションを起動 ===
+excel = win32.gencache.EnsureDispatch("Excel.Application")
+excel.DisplayAlerts = False  # 上書き確認ダイアログを非表示
+excel.Visible = False        # Excelウィンドウを表示しない
+
+# === 新しい空のExcelファイルを作成（先に保存が必要）===
+wb_target = excel.Workbooks.Add()
+wb_target.SaveAs(output_path)
+
+print(f"📁 空のマージファイルを作成しました：{output_path}")
+
+# === 各ファイルの最初のシートをコピー開始 ===
+for file_path in excel_files:
+    abs_path = os.path.abspath(file_path)
+    file_name = os.path.splitext(os.path.basename(file_path))[0]  # 拡張子なしファイル名
+
+    print(f"📥 コピー中: {file_name} ...")
+
+    wb_source = excel.Workbooks.Open(abs_path)  # 元ファイルを開く
+    sheet_to_copy = wb_source.Sheets(1)         # 最初のシートを取得
+    sheet_to_copy.Copy(Before=wb_target.Sheets(1))  # 新しいブックの先頭にコピー
+    wb_source.Close(False)  # 元ファイルを保存せずに閉じる
+
+    # コピーされたシートをファイル名でリネーム（最大31文字まで）
+    try:
+        wb_target.Sheets(1).Name = file_name[:31]
+    except Exception:
+        print(f"⚠️ シート名 \"{file_name}\" は不正な文字が含まれる可能性があります。リネーム失敗")
+
+# === デフォルトの空白シートを削除（もし存在すれば）===
+if wb_target.Sheets.Count > len(excel_files):
+    try:
+        for sheet in wb_target.Sheets:
+            if sheet.UsedRange.Count == 1 and not sheet.UsedRange.Value:
+                sheet.Delete()
+    except:
+        pass  # 削除に失敗しても無視
+
+# === 保存してExcelを終了 ===
+wb_target.Save()
+wb_target.Close()
+excel.Quit()
+
+print(f"\n✅ 統合完了！出力ファイル：{output_path}")
+
+
+
+
+import os
 import pandas as pd
 from openpyxl import Workbook, load_workbook
 
