@@ -1,3 +1,32 @@
+import shutil
+import os
+
+def move_folder(src: str, dst: str):
+    """
+    移动文件夹从 src 到 dst。
+    """
+    if not os.path.exists(src):
+        raise FileNotFoundError(f"源文件夹不存在: {src}")
+
+    if os.path.exists(dst):
+        raise FileExistsError(f"目标文件夹已存在: {dst}")
+
+    shutil.move(src, dst)
+    print(f"已成功移动 {src} 到 {dst}")
+
+
+# 用变量存放路径
+src_path = r"Z:\box\ab\A"
+dst_path = r"Z:\box\ab\B"
+
+# 调用方法
+move_folder(src_path, dst_path)
+
+
+
+
+
+
 
 # 開いていた場合は閉じる
 for wb in excel.Workbooks:
