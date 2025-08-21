@@ -1,3 +1,57 @@
+
+import shutil
+import os
+from datetime import datetime, timedelta
+
+# ========= 日付取得 =========
+def get_last_thursday():
+    """先週の木曜日の日付 (yyyymmdd) を返す"""
+    today = datetime.today()
+    days_since_thursday = (today.weekday() - 3) % 7  # 3は木曜
+    last_thursday = today - timedelta(days=days_since_thursday + 7)
+    return last_thursday.strftime("%Y%m%d")
+
+# ========= ファイル移動 =========
+def move_file(file_path, dst_folder):
+    """ファイルを移動する"""
+    if not os.path.isfile(file_path):
+        raise FileNotFoundError(f"ファイルが存在しません: {file_path}")
+    if not os.path.exists(dst_folder):
+        os.makedirs(dst_folder)
+    shutil.move(file_path, dst_folder)
+    print(f"[OK] {file_path} → {dst_folder}")
+
+# ========= フォルダ移動 =========
+def move_folder(src_folder, dst_folder):
+    """フォルダを移動する"""
+    if not os.path.exists(src_folder):
+        raise FileNotFoundError(f"フォルダが存在しません: {src_folder}")
+    if os.path.exists(dst_folder):
+        raise FileExistsError(f"目的フォルダが既に存在します: {dst_folder}")
+    shutil.move(src_folder, dst_folder)
+    print(f"[OK] {src_folder} → {dst_folder}")
+
+# ========= 変数定義 =========
+base_dir   = r"Z:\box\ab"           # ベースフォルダ
+date_str   = get_last_thursday()    # 先週木曜の日付
+
+file_c     = os.path.join(base_dir, f"c{date_str}.txt")  # cYYYYMMDD.txt
+folder_d   = os.path.join(base_dir, "d")                 # d フォルダ
+
+src_folder = os.path.join(base_dir, date_str)            # YYYYMMDD フォルダ
+dst_folder = os.path.join(base_dir, "B")                 # B フォルダ
+
+# ========= 実行 =========
+move_file(file_c, folder_d)       # ファイル移動
+move_folder(src_folder, dst_folder)  # フォルダ移動
+
+
+
+
+
+
+
+
 import shutil
 import os
 
