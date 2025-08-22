@@ -1,4 +1,72 @@
+import shutil
+from pathlib import Path
+from datetime import datetime, timedelta
 
+# ========= 日付取得 =========
+def get_last_thursday():
+    """先週の木曜日の日付 (yyyymmdd) を返す"""
+    today = datetime.today()
+    # weekday(): 月=0, 火=1, ..., 日=6 / 木=3
+    days_since_thu = (today.weekday() - 3) % 7
+    last_thu = today - timedelta(days=days_since_thu + 7)
+    return last_thu.strftime("%Y%m%d")
+
+# ========= ファイル移動（2引数だけ） =========
+def move_file(file_path, dst_folder):
+    """file_path を dst_folder へ移動する（dst_folder が無ければ作成）"""
+    file_path = Path(file_path)
+    dst_folder = Path(dst_folder)
+
+    if not file_path.is_file():
+        raise FileNotFoundError(f"ファイルが見つかりません: {file_path}")
+
+    dst_folder.mkdir(parents=True, exist_ok=True)  # 目的フォルダを用意
+    shutil.move(str(file_path), str(dst_folder))
+    print(f"[OK] {file_path} → {dst_folder}")
+
+# ========= フォルダ移動（2引数だけ） =========
+def move_folder(src_folder, dst_folder):
+    """
+    src_folder を dst_folder へ移動する。
+    - もし dst_folder が既に存在する場合は、src_folder をその“中”へ移動（例: B/20250814）
+    - まだ無い場合は dst_folder を新規作成して移動
+    """
+    src_folder = Path(src_folder)
+    dst_folder = Path(dst_folder)
+
+    if not src_folder.exists():
+        raise FileNotFoundError(f"フォルダが見つかりません: {src_folder}")
+
+    # dst_folder が既に存在するなら、その中に src の名前で移動する
+    if dst_folder.exists():
+        final_dst = dst_folder / src_folder.name
+    else:
+        # 存在しないなら、親だけ用意してからその場所へ移動
+        dst_folder.parent.mkdir(parents=True, exist_ok=True)
+        final_dst = dst_folder
+
+    # 最終行き先が既に存在していたら衝突なのでエラー
+    if final_dst.exists():
+        raise FileExistsError(f"移動先が既に存在します: {final_dst}")
+
+    shutil.move(str(src_folder), str(final_dst))
+    print(f"[OK] {src_folder} → {final_dst}")
+
+# ========= 変数定義（長いパスは全部ここで） =========
+base_dir   = Path(r"Z:\box\ab")         # ベースフォルダ（長いならここで一発で管理）
+date_str   = get_last_thursday()        # 先週木曜 yyyymmdd
+
+# ファイル: cYYYYMMDD.txt → d フォルダ
+file_c     = base_dir / f"c{date_str}.txt"
+folder_d   = base_dir / "d"
+
+# フォルダ: YYYYMMDD → B（B が存在するなら B\YYYYMMDD に入れる）
+src_folder = base_dir / date_str
+dst_folder = base_dir / "B"
+
+# ========= 実行例 =========
+move_file(file_c, folder_d)         # 例: Z:\box\ab\c20250814.txt → Z:\box\ab\d
+move_folder(src_folder, dst_folder) # 例: Z:\box\ab\20250814   → Z:\box\ab\B\20250814
 
 import shutil
 from pathlib import Path
