@@ -1,3 +1,16 @@
+try:
+    move_file(file_c, folder_d)
+except Exception as e:
+    print("[Error in move_file]:", e)
+
+try:
+    move_folder(src_folder, dst_folder)
+except Exception as e:
+    print("[Error in move_folder]:", e)
+
+
+
+
 import shutil
 from pathlib import Path
 from datetime import datetime, timedelta
