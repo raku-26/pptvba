@@ -1,3 +1,33 @@
+
+import openpyxl
+
+def clear_rows_from_fifth(path, sheet_name="aaasheet"):
+    # 打开 Excel 文件
+    wb = openpyxl.load_workbook(path)
+    
+    # 选择指定的工作表
+    if sheet_name not in wb.sheetnames:
+        print(f"工作表 {sheet_name} 不存在")
+        return
+    
+    ws = wb[sheet_name]
+    
+    # 遍历第5行到最后一行，清空内容
+    for row in ws.iter_rows(min_row=5, max_row=ws.max_row):
+        for cell in row:
+            cell.value = None
+    
+    # 保存修改
+    wb.save(path)
+    print(f"文件 {path} 中 {sheet_name} 的第5行及之后的内容已清空")
+
+# 示例调用
+# clear_rows_from_fifth("你的excel文件路径.xlsx")
+
+
+
+
+
 try:
     move_file(file_c, folder_d)
 except Exception as e:
