@@ -1,3 +1,15 @@
+curl -X POST https://chatapi.viber.com/pa/set_webhook \
+  -H "X-Viber-Auth-Token: YOUR_CHANNEL_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+        "url": "https://your-domain.com/viber-webhook"
+      }'
+
+
+
+
+
+
 
 import datetime
 
