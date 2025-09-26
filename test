@@ -1,4 +1,27 @@
 
+import datetime
+
+# 指定要写入的文件路径
+log_file = r"C:\path\to\your\log.txt"
+
+try:
+    # 这里写你要执行的程序 (示范：让它出错)
+    x = 1 / 0   # 故意制造除以零错误
+
+except Exception as e:
+    # 获取当前时间
+    now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    # 打开文件追加写入 (不会覆盖原本的内容)
+    with open(log_file, "a", encoding="utf-8") as f:
+        f.write(f"Ella - {now}\n")
+
+    print("已记录异常到日志文件！")
+
+
+
+
+
 import os
 import shutil
 from datetime import datetime
