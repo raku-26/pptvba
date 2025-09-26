@@ -1,4 +1,35 @@
 
+import os
+import shutil
+from datetime import datetime
+
+# 設定來源資料夾與目的資料夾
+source_folder = r"C:\path\to\your\folder"
+destination_folder = r"C:\path\to\destination"
+
+# 找出資料夾中所有 txt 檔案
+txt_files = [f for f in os.listdir(source_folder) if f.endswith(".txt")]
+
+if not txt_files:
+    print("資料夾中沒有 txt 檔案")
+else:
+    # 依照最後修改時間排序，取最新的
+    txt_files.sort(key=lambda f: os.path.getmtime(os.path.join(source_folder, f)), reverse=True)
+    latest_file = txt_files[0]
+
+    # 取得今天日期 (格式: YYYYMMDD.txt)
+    today_str = datetime.now().strftime("%Y%m%d") + ".txt"
+
+    # 複製並重新命名
+    source_path = os.path.join(source_folder, latest_file)
+    destination_path = os.path.join(destination_folder, today_str)
+
+    shutil.copy2(source_path, destination_path)
+
+    print(f"已將最新檔案 {latest_file} 複製並命名為 {today_str}")
+
+
+
 import openpyxl
 
 def clear_rows_from_fifth(path, sheet_name="aaasheet"):
